@@ -174,3 +174,88 @@ for name, idx in ckpt["class_to_idx"].items():
 
 - Dataset: [CT Scans for COVID-19 Classification](https://www.kaggle.com/datasets/azaemon/preprocessed-ct-scans-for-covid19) by Abu Zahid Bin Aziz, licensed under CC BY 4.0. The original images are from the [iCTCF](http://ictcf.biocuckoo.cn/) resource: Ning, W. et al., "iCTCF: an integrative resource of chest computed tomography images and clinical features of patients with COVID-19 pneumonia" (2020).
 - Model: Howard, A. et al., ["Searching for MobileNetV3"](https://arxiv.org/abs/1905.02244), ICCV 2019. Pretrained weights from [torchvision](https://pytorch.org/vision/stable/models/mobilenetv3.html).
+## Web Application
+
+This repository includes a full-stack web application built around the existing MobileNetV3-Large CT image classification model.
+
+### Features
+
+- Upload CT images in JPEG, PNG, or WebP format.
+- Preview the selected image before submitting it.
+- Run inference using the existing trained PyTorch checkpoint.
+- Display the predicted class and scores for all three classes.
+- Validate unsupported, malformed, and oversized uploads.
+- Responsive React interface.
+- Automated API tests using pytest.
+
+### Technology Stack
+
+- **Frontend:** React, Vite, CSS
+- **Backend:** Python, FastAPI, Uvicorn
+- **Machine Learning:** PyTorch, Torchvision
+- **Image Processing:** Pillow
+- **Testing:** pytest, HTTPX
+
+### Local Development
+
+#### Prerequisites
+
+- Python 3.11
+- Node.js and npm
+- The trained model checkpoint included in the repository
+
+#### Start the backend
+
+From the repository root, activate the Python virtual environment and install the backend dependencies as described in the project setup instructions.
+
+Start the API:
+
+```powershell
+python -m uvicorn backend.app.main:app --reload
+```
+
+The backend is available at `http://127.0.0.1:8000`.
+
+Interactive API documentation: `http://127.0.0.1:8000/docs`
+
+#### Start the frontend
+
+Open a second terminal:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+#### Run automated tests
+
+From the repository root, with the Python virtual environment activated:
+
+```powershell
+python -m pytest backend/tests/test_api.py -v
+```
+
+### API Endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/` | API welcome message |
+| GET | `/health` | Basic application and model-loaded status |
+| POST | `/predict` | Upload an image and receive a prediction |
+
+The prediction endpoint accepts JPEG, PNG, and WebP uploads up to 10 MB.
+
+### Important Limitations
+
+This is an experimental research demonstration, not a clinically validated medical device. Predictions and scores must not be used for diagnosis or treatment decisions.
+
+The model's output scores are not necessarily calibrated probabilities. Dataset composition, image-level data splitting, and the limitations documented in the original repository affect how results should be interpreted.
+
+### Attribution
+
+This web application builds on the original project and its trained model. Refer to the original repository, dataset documentation, and applicable licenses for attribution and permitted use.
+
+Original repository: https://github.com/chrispathway/covid-ct-classifier

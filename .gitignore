@@ -27,3 +27,17 @@ outputs/checkpoints/*
 *.pt
 *.pth
 !outputs/checkpoints/mobilenet_v3_large.pth
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+
+# Testing and Python-generated files
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
