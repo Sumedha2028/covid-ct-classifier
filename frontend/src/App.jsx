@@ -2,9 +2,7 @@
 import { useState } from "react";
 import "./App.css";
 
-
 const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-
 
 function App() {
   const [file, setFile] = useState(null);
@@ -12,6 +10,7 @@ function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   function handleFileChange(event) {
     const selected = event.target.files?.[0];
@@ -35,7 +34,10 @@ function App() {
       setFile(null);
       setPreview("");
       setError("Please select a JPEG, PNG, or WebP image.");
-      event.target.value = "";
+
+      if (event.target.value !== undefined) {
+        event.target.value = "";
+      }
       return;
     }
 
@@ -43,12 +45,33 @@ function App() {
       setFile(null);
       setPreview("");
       setError("Image size must be 10 MB or smaller.");
-      event.target.value = "";
+
+      if (event.target.value !== undefined) {
+        event.target.value = "";
+      }
       return;
     }
 
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
+  }
+
+  function handleDrop(event) {
+    event.preventDefault();
+    setDragging(false);
+
+    const selected = event.dataTransfer.files?.[0];
+    if (!selected) return;
+
+    handleFileChange({
+      target: {
+        files: [selected],
+        value: "",
+      },
+    });
+
+    const input = document.getElementById("ct-file");
+    if (input) input.value = "";
   }
 
   async function handlePredict() {
@@ -92,6 +115,7 @@ function App() {
     setPreview("");
     setResult(null);
     setError("");
+    setDragging(false);
 
     const input = document.getElementById("ct-file");
     if (input) input.value = "";
@@ -125,17 +149,35 @@ function App() {
             <span className="step">01</span>
             <div>
               <h2>Upload image</h2>
-              <p>Select a CT scan image from your device.</p>
+              <p>Select or drag a CT scan image from your device.</p>
             </div>
           </div>
 
-          <label className="dropzone" htmlFor="ct-file">
+          <label
+            className={`dropzone ${dragging ? "dragging" : ""}`}
+            htmlFor="ct-file"
+            onDragEnter={(event) => {
+              event.preventDefault();
+              setDragging(true);
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "copy";
+              setDragging(true);
+            }}
+            onDragLeave={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                setDragging(false);
+              }
+            }}
+            onDrop={handleDrop}
+          >
             {preview ? (
               <img className="preview" src={preview} alt="Selected CT scan" />
             ) : (
               <>
                 <span className="upload-icon">↑</span>
-                <strong>Choose a CT image</strong>
+                <strong>Choose or drop a CT image</strong>
                 <span>JPEG, PNG or WebP · Maximum 10 MB</span>
                 <span className="browse-button">Browse files</span>
               </>
